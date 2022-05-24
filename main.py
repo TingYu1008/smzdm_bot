@@ -52,8 +52,8 @@ class SMZDM_Bot(object):
 
     def on_failed(self, error_msg):
         wechat_url = "https://sctapi.ftqq.com/"+ self.secret_key +".send";
-        data = {"title":"smzdm%E7%AD%BE%E5%88%B0%E5%A4%B1%E8%B4%A5%E4%BA%86",
-                "desp":"error_msg"}
+        data = {"title":"smzdm签到失败了！",
+                "desp":error_msg}
         requests.Session().post(wechat_url, data = data)
 
 
