@@ -7,17 +7,16 @@ import requests,os
 from sys import argv
 
 import config
-from utils.serverchan_push import push_to_wechat
 
 class SMZDM_Bot(object):
     def __init__(self):
         self.session = requests.Session()
         # 添加 headers
         self.session.headers = config.DEFAULT_HEADERS
+        self.secret_key = ""
 
     def __json_check(self, msg):
         """
-        对请求 盖乐世社区 返回的数据进行进行检查
         1.判断是否 json 形式
         """
         try:
@@ -25,6 +24,7 @@ class SMZDM_Bot(object):
             print(result)
             return True
         except Exception as e:
+            on_failed(str(e))
             print(f'Error : {e}')            
             return False
 
@@ -36,6 +36,9 @@ class SMZDM_Bot(object):
         """
         self.session.headers['Cookie'] = cookies    
 
+    def load_wechat_key(self, key):
+        self.secret_key = key
+
     def checkin(self):
         """
         签到函数
@@ -46,21 +49,20 @@ class SMZDM_Bot(object):
             return msg.json()
         return msg.content
 
-
+    def on_failed(self, error_msg):
+        wechat_url = "https://sctapi.ftqq.com/"+ self.secret_key +".send";
+        data = {"title":"smzdm%E7%AD%BE%E5%88%B0%E5%A4%B1%E8%B4%A5%E4%BA%86",
+                "desp":"error_msg"}
+        requests.Session().post(wechat_url, data = data)
 
 
 if __name__ == '__main__':
     sb = SMZDM_Bot()
     # sb.load_cookie_str(config.TEST_COOKIE)
     cookies = os.environ["COOKIES"]
+    SERVERCHAN_SECRETKEY = os.environ["SERVERCHAN_SECRETKEY"]
+    sb.load_wechat_key(SERVERCHAN_SECRETKEY)
     sb.load_cookie_str(cookies)
     res = sb.checkin()
     print(res)
-    SERVERCHAN_SECRETKEY = os.environ["SERVERCHAN_SECRETKEY"]
-    print('sc_key: ', SERVERCHAN_SECRETKEY)
-    if isinstance(SERVERCHAN_SECRETKEY,str) and len(SERVERCHAN_SECRETKEY)>0:
-        print('检测到 SCKEY， 准备推送')
-        push_to_wechat(text = '什么值得买每日签到',
-                        desp = str(res),
-                        secretKey = SERVERCHAN_SECRETKEY)
     print('代码完毕')
