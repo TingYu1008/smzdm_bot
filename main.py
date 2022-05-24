@@ -22,10 +22,10 @@ class SMZDM_Bot(object):
         try:
             result = msg.json()
             print(result)
-            on_failed(str(result))
+            self.on_failed(str(result))
             return True
         except Exception as e:
-            on_failed(str(e))
+            self.on_failed(str(e))
             print(f'Error : {e}')            
             return False
 
